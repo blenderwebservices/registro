@@ -21,4 +21,9 @@ $db_0_host = '127.0.0.1';
 $db_0_name = 'registro';
 $db_0_user = 'root';
 $db_0_pass = '';
+// Credenciales 007 (produccion servidor axiacorehub))
+$db_axia_host = '127.0.0.1';
+$db_axia_name = 'admin_registro';
+$db_axia_user = 'userregistro';
+$db_axia_pass = 'aa$1ntY92iy#YIwf';
 ?>
