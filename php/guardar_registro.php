@@ -52,26 +52,41 @@ function quitar_acentos($cadena) {
 
 	// Validación reCAPTCHA v3
 	$recaptcha_secret = '6LdESIssAAAAAPhM5FcdA7sYDL0WyHeJyRFSiTiY';
-	$recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
+	$recaptcha_response = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
 	
 	if(empty($recaptcha_response)){
 		die("<script>alert('Error: Falta validación reCAPTCHA.'); history.back();</script>");
 	}
 	
-	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
-	curl_setopt($curl, CURLOPT_POST, true);
-	curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query([
+	$recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+	$recaptcha_post_data = array(
 		'secret' => $recaptcha_secret,
 		'response' => $recaptcha_response
-	]));
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	$recaptcha_verify = curl_exec($curl);
-	curl_close($curl);
+	);
+
+	if (function_exists('curl_init')) {
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $recaptcha_url);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($recaptcha_post_data));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		$recaptcha_verify = curl_exec($curl);
+		curl_close($curl);
+	} else {
+		$options = array(
+			'http' => array(
+				'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+				'method'  => 'POST',
+				'content' => http_build_query($recaptcha_post_data)
+			)
+		);
+		$context  = stream_context_create($options);
+		$recaptcha_verify = file_get_contents($recaptcha_url, false, $context);
+	}
 	
 	$recaptcha_data = json_decode($recaptcha_verify);
 	
-	if (!$recaptcha_data || !$recaptcha_data->success) {
+	if (!is_object($recaptcha_data) || !isset($recaptcha_data->success) || !$recaptcha_data->success) {
 		die("<script>alert('Error de reCAPTCHA. Verificación fallida.'); history.back();</script>");
 	}
 	
