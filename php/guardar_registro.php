@@ -50,6 +50,31 @@ function quitar_acentos($cadena) {
 	$guardar = trim($_POST['guardar']);
 	//if ($guardar == 'ok'){
 
+	// Validación reCAPTCHA
+	$recaptcha_secret = '6LdESIssAAAAAPhM5FcdA7sYDL0WyHeJyRFSiTiY';
+	$recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
+	
+	if(empty($recaptcha_response)){
+		die("<script>alert('Error: Falta validación reCAPTCHA.'); history.back();</script>");
+	}
+	
+	$curl = curl_init();
+	curl_setopt($curl, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query([
+		'secret' => $recaptcha_secret,
+		'response' => $recaptcha_response
+	]));
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	$recaptcha_verify = curl_exec($curl);
+	curl_close($curl);
+	
+	$recaptcha_data = json_decode($recaptcha_verify);
+	
+	if (!$recaptcha_data || !$recaptcha_data->success) {
+		die("<script>alert('Error de reCAPTCHA. Verificación fallida.'); history.back();</script>");
+	}
+
 	$tipoasis = trim($_POST['tipoasis']);
 	$origen = trim($_POST['origen']);
 	$email = strtolower(trim($_POST['email']));
