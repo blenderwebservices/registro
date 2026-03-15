@@ -2,31 +2,50 @@
 header('Content-Type: text/html; charset=UTF-8');
 date_default_timezone_set('America/Mexico_City');
 
-//require "phpqrcode/qrlib.php"; temp
+require_once "phpqrcode/qrlib.php";
 
 $dir = 'codigos/';
 if (!file_exists($dir))
 				mkdir($dir);
 
-//use PHPMailer; temp
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-//require_once "PHPMailer/src/Exception.php"; temp
-//require_once "PHPMailer/src/PHPMailer.php"; temp
+require_once "PHPMailer/src/Exception.php";
+require_once "PHPMailer/src/PHPMailer.php";
 
-//$Mail = new PHPMailer\PHPMailer\PHPMailer(); temp
+$Mail = new PHPMailer();
 
-$host_name = 'db5010978416.hosting-data.io';
-$database = 'dbs9280531';
-$user_name = 'dbu1674405';
-$password = 'Info1929..info1992$%';
+require_once __DIR__ . '/db_config.php';
+$host_name = $db_0_host;
+$database = $db_0_name;
+$user_name = $db_0_user;
+$password = $db_0_pass;
 
-function quitar_acentos($cadena){
-	$originales = 'ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜàáâãäåèéêëìíîïòóôõöùúû';
-	$modificadas = 'AAAAAAEEEEIIIIOOOOOUUUUAAAAAAEEEEIIIIOOOOOUUU';
-	$cadena = mb_convert_encoding($cadena, "UTF-8");
-	$cadena = strtr($cadena, mb_convert_encoding($cadena, "UTF-8"), $modificadas);
-	return mb_convert_encoding($cadena, "UTF-8");
+/**
+ * Quita acentos, diéresis y convierte la cadena a Mayúsculas.
+ * Soluciona el error de corrupción de consonantes en UTF-8.
+ */
+function quitar_acentos($cadena) {
+    // 1. Convertimos todo a mayúsculas de forma segura para UTF-8 primero.
+    // Esto reduce el tamaño del mapa de traducción a la mitad.
+    $cadena = mb_strtoupper($cadena, 'UTF-8');
+
+    // 2. Definimos el mapa de reemplazos usando un array asociativo.
+    // strtr() con un array es "multi-byte safe", lo que evita que se rompan las consonantes.
+    $mapa = [
+        'Á' => 'A', 'À' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A',
+        'É' => 'E', 'È' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+        'Í' => 'I', 'Ì' => 'I', 'Î' => 'I', 'Ï' => 'I',
+        'Ó' => 'O', 'Ò' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O',
+        'Ú' => 'U', 'Ù' => 'U', 'Û' => 'U', 'Ü' => 'U',
+        // 'Ñ' => 'N' // Descomenta esta línea si también quieres quitar la Ñ
+    ];
+
+    // 3. Retornamos la cadena traducida.
+    return strtr($cadena, $mapa);
 }
+
 
 	$guardar = trim($_POST['guardar']);
 	//if ($guardar == 'ok'){
@@ -118,18 +137,17 @@ if (!empty($nombres)) {
 	
 	$fhregistro = date('y/m/d H:i:s', time());
 	
-	$completo = $nombres.' '.$apellidos;
+	$completo = "$nombres $apellidos";
 
-
-	
+	 
 	$dbh = mysqli_connect($host_name, $user_name, $password, $database);
-	mysqli_set_charset($dbh, "utf8mb3"); 
+	mysqli_set_charset($dbh, "utf8mb4"); 
 
 	if (mysqli_connect_errno()) {
 		die('<p>Error al conectar con servidor MySQL contacte al +52 3321349874 24 hrs. o enviar correo a miguelbermejo@hotmail: '.mysqli_connect_error().'</p>');
 	  }
 
-	  if (!mysqli_query($dbh,"INSERT INTO registro_leon_2026(tipoasis,email,nombres,apellidos,celular,ciudad,estado,pais,empresa,giroqr	,giro1,giro2,giro3,giro4,giro5,giro6,giro7,giro8,giro9,giro10,origen,fhregistro) VALUES ('$tipoasis','$email','$nombres','$apellidos','$celular','$ciudad','$estado','$pais','$empresa','$giroqr','$giro1','$giro2','$giro3','$giro4','$giro5','$giro6','$giro7','$giro8','$giro9','$giro10','$origen','$fhregistro')"))
+	  if (!mysqli_query($dbh,"INSERT INTO registro_leon_2026(tipoasis,email,nombres,apellidos,celular,ciudad,estado,pais,empresa,giroqr	,giro1,giro2,giro3,giro4,giro5,giro6,giro7,giro8,giro9,giro10,origen,fhregistro,grupo) VALUES ('$tipoasis','$email','$nombres','$apellidos','$celular','$ciudad','$estado','$pais','$empresa','$giroqr','$giro1','$giro2','$giro3','$giro4','$giro5','$giro6','$giro7','$giro8','$giro9','$giro10','$origen','$fhregistro','1')"))
 	{
 		echo("Error al ingresar registro de asistente contacte a +52 3321349874: " . mysqli_error($dbh));
 	} else {
@@ -151,9 +169,9 @@ if (!empty($nombres)) {
 		$tamaño = 8; //Tamaño de Pixel
 		$level = 'L'; //Precisión Baja
 		$framSize = 3; //Tamaño en blanco
-		$contenido = $idnew.'##'.$tipoasis.'##'.$nombres.'##'.$apellidos.'##'.$giroqr.'##'.$empresa.'##'.$email; //Texto
+		$contenido = "$idnew##$tipoasis##$nombres##$apellidos##$giroqr##$empresa##$email"; //Texto
 
-	//	QRcode::png($contenido, $filename, $level, $tamaño, $framSize);  temp
+		QRcode::png($contenido, $filename, $level, $tamaño, $framSize); 
 
 	}
 
@@ -161,15 +179,15 @@ if (!empty($nombres)) {
 	//try {
 		
 		
-		//$mail->addReplyTo('miguelbermejo@hotmail.com', 'Extra');
-		// $mail->addBCC('miguelbermejo@hotmail.com');
+		$Mail->addReplyTo('miguelbermejo@hotmail.com', 'Extra');
+		$Mail->addBCC('miguelbermejo@hotmail.com');
 
 		//Content
 		$Mail->CharSet = 'UTF-8';
 		$Mail->isHTML(true);                                  //Set email format to HTML
 		
 		$Mail->setFrom('mail@registro.expomecanico.mx');
-		$Mail->Subject = utf8_decode('Registro terminado exitosamente');
+		$Mail->Subject = 'Registro terminado exitosamente';//utf8_decode('Registro terminado exitosamente');
 		$Mail->addAddress($email);
 
 

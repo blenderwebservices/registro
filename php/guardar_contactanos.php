@@ -28,10 +28,11 @@ if($notas == 'EXPOSITOR'){
 
 if (isset($_POST['email'])) {
     //guardar información en la BD
-    //$host_name = 'db5000813070.hosting-data.io';
-    //$database = 'dbs721729';
-    //$user_name = 'dbu326748';
-    //$password = 'Outlet876..';
+    // require_once __DIR__ . '/db_config.php';
+    // $host_name = $db_3_host;
+    // $database = $db_3_name;
+    // $user_name = $db_3_user;
+    // $password = $db_3_pass;
 
 
 

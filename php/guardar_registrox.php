@@ -14,10 +14,11 @@ require_once "PHPMailer/src/PHPMailer.php";
 
 $Mail = new PHPMailer\PHPMailer\PHPMailer();
 
-$host_name = 'db5010978416.hosting-data.io';
-$database = 'dbs9280531';
-$user_name = 'dbu1674405';
-$password = 'Info1929..info1992$%';
+require_once __DIR__ . '/db_config.php';
+$host_name = $db_2_host;
+$database = $db_2_name;
+$user_name = $db_2_user;
+$password = $db_2_pass;
 
 function quitar_acentos($cadena){
 	$originales = 'ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜàáâãäåèéêëìíîïòóôõöùúû';
@@ -122,7 +123,7 @@ if (!empty($nombres)) {
 
 	
 	$dbh = mysqli_connect($host_name, $user_name, $password, $database);
-	mysqli_set_charset($dbh, "utf8mb3"); 
+	mysqli_set_charset($dbh, "utf8mb4"); 
 
 	if (mysqli_connect_errno()) {
 		die('<p>Error al conectar con servidor MySQL contacte al +52 3321349874 24 hrs. o enviar correo a miguelbermejo@hotmail: '.mysqli_connect_error().'</p>');

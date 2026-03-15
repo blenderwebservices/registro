@@ -4,10 +4,11 @@ date_default_timezone_set('America/Mexico_City');
 
 
 
-$host_name = 'db630619280.db.1and1.com';
-$database = 'db630619280';
-$user_name = 'dbo630619280';
-$password = 'Outlet876..';
+require_once __DIR__ . '/db_config.php';
+$host_name = $db_1_host;
+$database = $db_1_name;
+$user_name = $db_1_user;
+$password = $db_1_pass;
 
 function quitar_acentos($cadena){
 	$originales = 'ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜàáâãäåèéêëìíîïòóôõöùúû';
