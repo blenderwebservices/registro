@@ -1,9 +1,4 @@
 <?php
-// TEMPORAL: Habilitar reporte de errores para depurar el HTTP 500
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 header('Content-Type: text/html; charset=UTF-8');
 date_default_timezone_set('America/Mexico_City');
 
@@ -22,10 +17,10 @@ require_once "PHPMailer/src/PHPMailer.php";
 $Mail = new PHPMailer();
 
 require_once __DIR__ . '/db_config.php';
-$host_name = $db_0_host;
-$database = $db_0_name;
-$user_name = $db_0_user;
-$password = $db_0_pass;
+$host_name = $db_axia_host;
+$database = $db_axia_name;
+$user_name = $db_axia_user;
+$password = $db_axia_pass;
 
 /**
  * Quita acentos, diéresis y convierte la cadena a Mayúsculas.
