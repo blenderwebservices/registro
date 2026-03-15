@@ -20,8 +20,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google ReCaptcha v2 -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Google ReCaptcha v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdESIssAAAAAHaN30tNe-Qxkxg8vFdtEfKPGQL-"></script>
 
     <style>
         body {
@@ -96,6 +96,7 @@
                 <input name="guardar" id="guardar" type="hidden" value="ok" >
                 <input id="origen" name="origen" type="hidden" value="PREREGISTRO">
                 <input id="tipoasis" name="tipoasis" type="hidden" value="">
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
                 <!-- added for ajax responses -->
                 <input id="asistido" name="asistido" type="hidden" value="">
                 <input id="ediciones" name="ediciones" type="hidden" value="">
@@ -220,9 +221,9 @@
                     </label>
                 </div>
                 
-                <!-- Google ReCaptcha Widget -->
+                <!-- Google ReCaptcha Widget (Invisible/v3) -->
                 <div class="flex justify-center w-full" id="recaptcha-container">
-                    <div class="g-recaptcha" data-sitekey="6LdESIssAAAAAHaN30tNe-Qxkxg8vFdtEfKPGQL-"></div>
+                    <p class="text-xs text-slate-400 text-center">Este sitio está protegido por reCAPTCHA y se aplican la <a href="https://policies.google.com/privacy" target="_blank" class="text-red-500 hover:underline">Política de privacidad</a> y los <a href="https://policies.google.com/terms" target="_blank" class="text-red-500 hover:underline">Términos de servicio</a> de Google.</p>
                 </div>
                 
                 <!-- Submit Action -->
@@ -404,43 +405,32 @@
                     hasError = true;
                 }
 
-                // Validar ReCaptcha
-                if (!hasError) {
-                    var recaptchaResponse = grecaptcha.getResponse();
-                    if(recaptchaResponse.length === 0) {
-                        $("#recaptcha-container").addClass("border border-red-500 rounded-lg p-2 bg-red-50/50 transition-all duration-300");
-                        showToast("Demuestra que eres humano (Completa el Captcha)");
-                        firstErrorElement = $("#recaptcha-container");
-                        hasError = true;
-                    } else {
-                        $("#recaptcha-container").removeClass("border border-red-500 rounded-lg p-2 bg-red-50/50 transition-all duration-300");
-                    }
-                }
-
-                // Si hay error, hacemos scroll hacia el primer elemento
-                if (hasError) {
-                    $('html, body').animate({
-                        scrollTop: firstErrorElement.offset().top - 100
-                    }, 500);
-                    
-                    // Efecto de sacudida al botón
-                    let $btn = $(this);
-                    $btn.addClass("animate-[shake_0.5s_ease-in-out]");
-                    setTimeout(() => $btn.removeClass("animate-[shake_0.5s_ease-in-out]"), 500);
-                    return false;
-                }
-
-                // Si todo está bien, mostrar feedback de éxito y enviar formulario
+                // Si todo está bien, verificar v3 reCAPTCHA y enviar
                 let $btn = $(this);
-                $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> PROCESANDO...');
-                $btn.removeClass("from-red-600 to-red-700").addClass("from-green-600 to-green-700");
-                
-                showToast("¡Todo correcto! Guardando registro...", "success");
-                
-                // Pequeño timeout antes de submit para asegurar que el usuario vea el cambio a procesando
-                setTimeout(() => {
-                    $("#formulario").submit();
-                }, 800);
+                $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> VERIFICANDO...');
+                $btn.prop('disabled', true);
+                $btn.removeClass("from-red-600 to-red-700").addClass("from-slate-400 to-slate-500 cursor-not-allowed");
+
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('6LdESIssAAAAAHaN30tNe-Qxkxg8vFdtEfKPGQL-', {action: 'submit'}).then(function(token) {
+                        // Insert the token into the hidden input
+                        document.getElementById('g-recaptcha-response').value = token;
+                        
+                        $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> PROCESANDO...');
+                        $btn.removeClass("from-slate-400 to-slate-500 cursor-not-allowed").addClass("from-green-600 to-green-700");
+                        
+                        showToast("¡Todo correcto! Guardando registro...", "success");
+                        
+                        setTimeout(() => {
+                            $("#formulario").submit();
+                        }, 800);
+                    }).catch(function(error){
+                         $btn.html('FINALIZAR REGISTRO <i class="fa-solid fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>');
+                         $btn.prop('disabled', false);
+                         $btn.removeClass("from-slate-400 to-slate-500 cursor-not-allowed").addClass("from-red-600 to-red-700");
+                         showToast("Error validando reCAPTCHA. Intenta nuevamente.", "error");
+                    });
+                });
             });
         });
     </script>

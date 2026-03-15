@@ -50,7 +50,7 @@ function quitar_acentos($cadena) {
 	$guardar = trim($_POST['guardar']);
 	//if ($guardar == 'ok'){
 
-	// Validación reCAPTCHA
+	// Validación reCAPTCHA v3
 	$recaptcha_secret = '6LdESIssAAAAAPhM5FcdA7sYDL0WyHeJyRFSiTiY';
 	$recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
 	
@@ -73,6 +73,11 @@ function quitar_acentos($cadena) {
 	
 	if (!$recaptcha_data || !$recaptcha_data->success) {
 		die("<script>alert('Error de reCAPTCHA. Verificación fallida.'); history.back();</script>");
+	}
+	
+	// Optional snippet to check ReCaptcha v3 score (0.0 to 1.0)
+	if (isset($recaptcha_data->score) && $recaptcha_data->score < 0.5) {
+	     die("<script>alert('Actividad sospechosa detectada. Por favor, intenta de nuevo más tarde.'); history.back();</script>");
 	}
 
 	$tipoasis = trim($_POST['tipoasis']);
