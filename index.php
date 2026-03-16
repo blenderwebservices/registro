@@ -1,9 +1,10 @@
+<?php include_once 'php/keys.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Expo Mecánico Automotriz Internacional PACHUCA 2026 - Registro</title>
+    <title>Expo Mecánico Automotriz Internacional LEON 2026 - Registro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -21,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google ReCaptcha v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdESIssAAAAAHaN30tNe-Qxkxg8vFdtEfKPGQL-"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $RECAPTCHA_SITE_KEY; ?>"></script>
 
     <style>
         body {
@@ -412,7 +413,7 @@
                 $btn.removeClass("from-red-600 to-red-700").addClass("from-slate-400 to-slate-500 cursor-not-allowed");
 
                 grecaptcha.ready(function() {
-                    grecaptcha.execute('6LdESIssAAAAAHaN30tNe-Qxkxg8vFdtEfKPGQL-', {action: 'submit'}).then(function(token) {
+                    grecaptcha.execute('<?php echo $RECAPTCHA_SITE_KEY; ?>', {action: 'submit'}).then(function(token) {
                         // Insert the token into the hidden input
                         document.getElementById('g-recaptcha-response').value = token;
                         

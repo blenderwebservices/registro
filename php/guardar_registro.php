@@ -17,10 +17,10 @@ require_once "PHPMailer/src/PHPMailer.php";
 $Mail = new PHPMailer();
 
 require_once __DIR__ . '/db_config.php';
-$host_name = $db_axia_host;
-$database = $db_axia_name;
-$user_name = $db_axia_user;
-$password = $db_axia_pass;
+$host_name = $db_ENV_host;
+$database = $db_ENV_name;
+$user_name = $db_ENV_user;
+$password = $db_ENV_pass;
 
 /**
  * Quita acentos, diéresis y convierte la cadena a Mayúsculas.
@@ -51,7 +51,8 @@ function quitar_acentos($cadena) {
 	//if ($guardar == 'ok'){
 
 	// Validación reCAPTCHA v3
-	$recaptcha_secret = '6LdESIssAAAAAPhM5FcdA7sYDL0WyHeJyRFSiTiY';
+	require_once 'keys.php';
+	$recaptcha_secret = $RECAPTCHA_SECRET_KEY;
 	$recaptcha_response = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
 	
 	if(empty($recaptcha_response)){
