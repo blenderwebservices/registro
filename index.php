@@ -406,6 +406,17 @@
                     hasError = true;
                 }
 
+                // Si hay algún error, enfocamos el primer elemento con error y detenemos el envío
+                if (hasError) {
+                    if (firstErrorElement) {
+                        $('html, body').animate({
+                            scrollTop: firstErrorElement.offset().top - 150
+                        }, 300);
+                        firstErrorElement.focus();
+                    }
+                    return false;
+                }
+
                 // Si todo está bien, verificar v3 reCAPTCHA y enviar
                 let $btn = $(this);
                 $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> VERIFICANDO...');
