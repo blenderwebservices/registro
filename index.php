@@ -276,41 +276,6 @@
             var tipoasis = getUrlParameter('tipoasis');
             $('#tipoasis').val(tipoasis);
 
-            // Validacion AJAX de Email (Respetando el original)
-            $("#email").on('blur', function() {
-                if($("#email").val() != "") {
-                    var regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-                    if (regex.test($('#email').val().trim())) {
-                        $.ajax({
-                            type: 'GET',
-                            dataType: 'json',
-                            url: 'php/buscar_registro.php',
-                            data: { 'email': $("#email").val() }
-                        }).done(function(data) {
-                            if(data.status == 'registrado'){
-                                showToast("Este email ya está registrado.", "error");
-                                $("#email").val("");
-                                $("#email").addClass("border-red-500 ring-2 ring-red-200");
-                            }else if(data.status == 'false'){
-                                $("#asistido").val('');
-                                $("#ediciones").val('');                                    
-                            } else {							
-                                if(data.data && data.data.data && data.data.data.length > 0) {
-                                    var ediciones = data.data.data[0].ediciones;
-                                    var asistido = "Edi-"+data.data.data[0].asistido;
-                                    $("#asistido").val(asistido);
-                                    $("#ediciones").val(ediciones);
-                                }
-                            }
-                        });
-                        $("#email").removeClass("border-red-500 ring-2 ring-red-200");
-                    } else {
-                        showToast("Formato de correo inválido", "error");
-                        $("#email").addClass("border-red-500 ring-2 ring-red-200");
-                    }
-                }
-            });
-
             // Función para mostrar Toast/Roast
             function showToast(message, type = "error") {
                 Toastify({
@@ -347,11 +312,12 @@
             });
 
             // LOGICA DE ENVIO CON VALIDACION "ROAST"
-            $("#btn-submit").on("click", function(e) {
+            $("#btn-submit").on("click", async function(e) {
                 e.preventDefault(); // Detenemos el submit real
                 
                 let hasError = false;
                 let firstErrorElement = null;
+                let $btn = $(this);
 
                 // Array de campos obligatorios
                 const requiredFields = [
@@ -406,6 +372,51 @@
                     hasError = true;
                 }
 
+                // Si todo va bien localmente, hacemos la validación en backend del email
+                if (!hasError) {
+                    let emailVal = $("#email").val().trim();
+                    let originalBtnHtml = $btn.html();
+                    $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> VERIFICANDO EMAIL...');
+                    $btn.prop('disabled', true);
+                    $btn.removeClass("from-red-600 to-red-700").addClass("from-slate-400 to-slate-500 cursor-not-allowed");
+
+                    try {
+                        const data = await $.ajax({
+                            type: 'GET',
+                            dataType: 'json',
+                            url: 'php/buscar_registro.php',
+                            data: { 'email': emailVal }
+                        });
+
+                        if(data.status === 'registrado'){
+                            showToast("Este email ya está registrado en esta edición.", "error");
+                            $("#email").addClass("border-red-500 ring-2 ring-red-200");
+                            firstErrorElement = $("#email");
+                            hasError = true;
+                        } else if(data.status === 'false'){
+                            $("#asistido").val('');
+                            $("#ediciones").val('');                                    
+                        } else {							
+                            if(data.data && data.data.data && data.data.data.length > 0) {
+                                var ediciones = data.data.data[0].ediciones;
+                                var asistido = "Edi-"+data.data.data[0].asistido;
+                                $("#asistido").val(asistido);
+                                $("#ediciones").val(ediciones);
+                            }
+                        }
+                    } catch (error) {
+                        showToast("Error al conectar con el servidor para validar el email.", "error");
+                        firstErrorElement = $("#email");
+                        hasError = true;
+                    } finally {
+                        if (hasError) {
+                            $btn.html(originalBtnHtml);
+                            $btn.prop('disabled', false);
+                            $btn.removeClass("from-slate-400 to-slate-500 cursor-not-allowed").addClass("from-red-600 to-red-700");
+                        }
+                    }
+                }
+
                 // Si hay algún error, enfocamos el primer elemento con error y detenemos el envío
                 if (hasError) {
                     if (firstErrorElement) {
@@ -418,11 +429,8 @@
                 }
 
                 // Si todo está bien, verificar v3 reCAPTCHA y enviar
-                let $btn = $(this);
-                $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> VERIFICANDO...');
-                $btn.prop('disabled', true);
-                $btn.removeClass("from-red-600 to-red-700").addClass("from-slate-400 to-slate-500 cursor-not-allowed");
-
+                $btn.html('<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> VERIFICANDO RECAPTCHA...');
+                
                 grecaptcha.ready(function() {
                     grecaptcha.execute('<?php echo $RECAPTCHA_SITE_KEY; ?>', {action: 'submit'}).then(function(token) {
                         // Insert the token into the hidden input

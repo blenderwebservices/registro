@@ -1,17 +1,17 @@
 <?php
-// Credenciales 1 (db630619280)
+// Credenciales 1 (db630619280). no esta registrada en servidor ionos
 $db_1_host = 'db630619280.db.1and1.com';
 $db_1_name = 'db630619280';
 $db_1_user = 'dbo630619280';
 $db_1_pass = 'Outlet876..';
 
-// Credenciales 2 (dbs9280531)
+// Credenciales 2 (dbs9280531). si esta registrada en servidor ionos
 $db_2_host = 'db5010978416.hosting-data.io';
 $db_2_name = 'dbs9280531';
 $db_2_user = 'dbu1674405';
 $db_2_pass = 'Info1929..info1992$%';
 
-// Credenciales 3 (contactanos - dbs721729)
+// Credenciales 3 (contactanos - dbs721729) . pertenece al outlet de marcas 2021
 $db_3_host = 'db5000813070.hosting-data.io';
 $db_3_name = 'dbs721729';
 $db_3_user = 'dbu326748';
